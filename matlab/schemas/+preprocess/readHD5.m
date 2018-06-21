@@ -37,7 +37,7 @@ catch
 end
 
 % Get version of the file
-version  = H5Tools.readAttribute(fp,'Version');
+version  = round(H5Tools.readAttribute(fp,'Version'));
 
 switch version
     case 1
@@ -153,6 +153,7 @@ switch version
         
         % read wf and convert waveform to structure
         asVersion = H5Tools.readAttribute(fp,'AS_Version');
+        asVersion = 2.1;
         switch asVersion
             case 2
                 assert(strcmp(deblank(waveformDescStr),'Photodiode, FrameSync, Time'),...
@@ -162,12 +163,20 @@ switch version
                 data.scanImage = wf(:,2);
                 data.ts = wf(:,3);
             case 2.1
-                assert(strcmp(deblank(waveformDescStr),'Photodiode, ScanImageFrameSync, LaserPower ,Time'),...
+                assert(strcmp(deblank(waveformDescStr),'Photodiode, ScanImageFrameSync, LaserPower ,Time') ||...
+                    strcmp(deblank(waveformDescStr),'Photodiode, ScanImageFrameSync, LaserPower, Time'),...
             'waveform Channels Description is wrong for this file version');
                 wf = H5Tools.readDataset(fp,'Analog Signals') ;
                 data.syncPd = wf(:,1);
                 data.scanImage = wf(:,2);
                 data.ts = wf(:,4);
+            case 2.2
+                assert(strcmp(deblank(waveformDescStr),'Photodiode, ScanImageFrameSync, LaserPower, Temperature ,Time'),...
+            'waveform Channels Description is wrong for this file version');
+                wf = H5Tools.readDataset(fp,'Analog Signals') ;
+                data.syncPd = wf(:,1);
+                data.scanImage = wf(:,2);
+                data.ts = wf(:,5);
         end
         
         

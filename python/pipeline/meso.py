@@ -129,6 +129,10 @@ class ScanInfo(dj.Imported):
         if scan.num_channels == 1:
             CorrectionChannel().fill(key)
 
+        # Fill SegmentationTask if scan in autosegment
+        if experiment.AutoProcessing() & key & {'autosegment': True}:
+            SegmentationTask().fill(key)
+
 
 @schema
 class Quality(dj.Computed):
@@ -1090,7 +1094,6 @@ class Segmentation(dj.Computed):
         # Get masks
         image_height, image_width = (ScanInfo.Field() & self).fetch1('px_height', 'px_width')
         mask_pixels, mask_weights = mask_rel.fetch('pixels', 'weights', order_by='mask_id')
-        mask_weights = [w - w.min() for w in mask_weights] # make all weights positive
 
         # Reshape masks
         masks = Segmentation.reshape_masks(mask_pixels, mask_weights, image_height, image_width)
